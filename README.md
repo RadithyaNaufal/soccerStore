@@ -1,7 +1,8 @@
 https://radithya-naufal-soccerstore.pbp.cs.ui.ac.id/
 
 1. To add a new Django project, use terminal on the directory file and type "django-admin startproject nameoftheproject", and then type "python manage.py startapp main" to create main folder. Open settings.py inside project folder and add 'main' in INSTALLED_APPS. Add 6 subjects inside models.py based on what we told from the assignments, such as name, price, description, etc. Add some information code inside views.py so that it could be returned to main.html. Add index inside urls.py so that it could run the code inside views.py. Open PWS in browser and add new project, save the important information and then edit the environs, add DB_HOST, DB_NAME, etc which already have been shared via email, and PRODUCTION=True and SCHEMA=tugas_individu.
-2. HTTP Request      →       urls.py
+2. (Recommend to use "raw" button in github to see the diagram)
+   HTTP Request      →       urls.py
                                 ↓
 models.py ← read/write data → views.py → HTTP Response (HTML)
                                 ↑
