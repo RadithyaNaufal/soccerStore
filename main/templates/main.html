@@ -2,16 +2,5 @@
 
 <h4>Name:</h4>
 <p>{{ name }}</p>
-<h4>NPM:</h4>
-<p>{{ npm }}</p>
 <h4>Class:</h4>
 <p>{{ class }}</p>
-
-<h3>Products:</h3>
-<ul>
-  {% for p in products %}
-    <li>{{ p.name }} - Rp{{ p.price }}</li>
-  {% empty %}
-    <li>There is no Product.</li>
-  {% endfor %}
-</ul>
