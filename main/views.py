@@ -3,7 +3,7 @@ from .models import Product
 
 def index(request):
     context = {
-        "app_name": "Soccer Store",
+        "app_name": "My Soccer Store",
         "name": "Radithya Naufal Mulia",
         "class": "KKI"
     }
