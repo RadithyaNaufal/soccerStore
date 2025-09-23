@@ -1,3 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
 <h1>{{ app_name }}</h1>
 
 <h5>NPM: </h5>
@@ -9,9 +11,22 @@
 <h5>Class:</h5>
 <p>{{ class }}</p>
 
+
 <a href="{% url 'main:create_news' %}">
   <button>+ Add Products</button>
 </a>
+<a href="{% url 'main:logout' %}">
+  <button>Logout</button>
+</a>
+<h5>Last login session: {{ last_login }}</h5>
+<hr>
+
+<a href="?filter=all">
+    <button type="button">All Articles</button>
+</a>
+<a href="?filter=my">
+    <button type="button">My Articles</button>
+</a> 
 
 <hr>
 
@@ -46,3 +61,5 @@
 {% endfor %}
 
 {% endif %}
+
+{% endblock %}
