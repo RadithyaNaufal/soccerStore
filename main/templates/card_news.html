@@ -1,0 +1,83 @@
+{% load static %}
+{% load humanize %}
+<article class="flex bg-white rounded-lg border border-gray-200 overflow-hidden mb-4 transform transition duration-300 hover:scale-105 hover:shadow-xl cursor-pointer">
+  
+  <!-- Thumbnail kiri -->
+  <div class="w-1/3 relative overflow-hidden">
+    {% if news.thumbnail %}
+      <img src="{{ news.thumbnail }}" alt="{{ news.name }}" class="w-full h-full object-contain">
+    {% else %}
+      <div class="w-full h-full bg-gray-200"></div>
+    {% endif %}
+
+    <!-- Category Badge -->
+    <div class="absolute top-3 left-3">
+      <span class="inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-medium bg-purple-700 text-yellow-400">
+        {{ news.get_category_display }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Konten kanan -->
+  <div class="w-2/3 p-5 flex flex-col justify-between">
+    <!-- Meta info -->
+    <div>
+      <div class="flex items-center text-sm text-black-800 mb-2">
+        <time datetime="{{ news.created_at|date:'c' }}" class="font-semibold">
+          {{ news.created_at|date:"M j, Y" }}
+        </time>
+        <span class="mx-2">•</span>
+        <span class="font-semibold">{{ news.news_views|intcomma }} views</span>
+      </div>      
+
+      <!-- Nama (judul produk/berita) -->
+      <h3 class="text-xl font-semibold text-gray-900 mb-2 leading-tight">
+        <a href="{% url 'main:show_news' news.id %}" class="hover:text-purple-700 transition-colors">
+          {{ news.name }}
+        </a>
+      </h3>
+
+      <!-- Nama Author -->
+      {% if news.user %}
+        <p class="text-sm text-gray-500 mb-2">Author: {{ news.user.username }}</p>
+      {% else %}
+        <p class="text-sm text-gray-500 mb-2">Author: Anonymous</p>
+      {% endif %}
+
+      <!-- Harga -->
+      <p class="text-purple-700 font-semibold mb-2">
+        Rp {{ news.price|intcomma }}
+      </p>
+
+      <!-- Deskripsi singkat -->
+      <p class="text-gray-700 text-sm leading-relaxed line-clamp-2">
+        {{ news.description|truncatewords:30 }}
+      </p>
+
+      <!-- Featured Badge -->
+      {% if news.is_featured %}
+      <span class="inline-block mt-2 px-2 py-0.5 text-xs font-medium bg-yellow-400 text-purple-800 rounded">
+        Featured
+      </span>
+      {% endif %}
+    </div>
+
+    <!-- Tombol aksi -->
+    <div class="flex items-center justify-between mt-4">
+      <a href="{% url 'main:show_news' news.id %}" class="text-purple-700 hover:text-yellow-500 font-medium text-sm transition-colors">
+        Read more →
+      </a>
+
+      {% if user.is_authenticated and news.user == user %}
+      <div class="flex space-x-2">
+        <a href="{% url 'main:edit_news' news.id %}" class="text-gray-600 hover:text-purple-700 text-sm transition-colors">
+          Edit
+        </a>
+        <a href="{% url 'main:delete_news' news.id %}" class="text-red-600 hover:text-red-700 text-sm transition-colors">
+          Delete
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</article>

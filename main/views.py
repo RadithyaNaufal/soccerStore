@@ -1,19 +1,18 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from main.forms import NewsForm
 from main.models import News
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.core import serializers
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 import datetime
-from django.http import HttpResponseRedirect
 from django.urls import reverse
 
 @login_required(login_url='/login')
 def show_main(request):
-    filter_type = request.GET.get("filter", "all")  # default 'all'
+    filter_type = request.GET.get("filter", "all")
 
     if filter_type == "all":
         news_list = News.objects.all()
@@ -26,9 +25,25 @@ def show_main(request):
         'name': request.user.username,
         'class': 'KKI',
         'news_list': news_list,
-        'last_login': request.COOKIES.get('last_login', 'Never')
+        'last_login': request.COOKIES.get('last_login', 'Never'),
     }
-    return render(request, "main.html",context)
+    return render(request, "main.html", context)
+
+
+@login_required(login_url='/login')
+def show_category(request, category):
+    news_list = News.objects.filter(category=category)
+
+    context = {
+        'app_name': 'Soccer Store',
+        'npm' : '2406365225',
+        'name': request.user.username,
+        'class': 'KKI',
+        'news_list': news_list,
+        'last_login': request.COOKIES.get('last_login', 'Never'),
+    }
+    return render(request, "main.html", context)
+
 
 @login_required(login_url='/login')
 def create_news(request):
@@ -49,7 +64,7 @@ def create_news(request):
 @login_required(login_url='/login')
 def show_news(request, id):
     news = get_object_or_404(News, pk=id)
-
+    news.increment_views()
     context = {
         'news': news
     }
@@ -117,3 +132,22 @@ def logout_user(request):
     response = HttpResponseRedirect(reverse('main:login'))
     response.delete_cookie('last_login')
     return response
+
+def edit_news(request, id):
+    news = get_object_or_404(News, pk=id)
+    form = NewsForm(request.POST or None, instance=news)
+    if form.is_valid() and request.method == 'POST':
+        form.save()
+        return redirect('main:show_main')
+
+    context = {
+        'form': form
+    }
+
+    return render(request, "edit_news.html", context)
+
+def delete_news(request, id):
+    news = get_object_or_404(News, pk=id)
+    if news.user == request.user or request.user.is_superuser:
+        news.delete()
+    return HttpResponseRedirect(reverse('main:show_main'))

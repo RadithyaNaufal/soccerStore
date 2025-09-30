@@ -1,25 +1,93 @@
 {% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block meta %}
+<title>{{ news.name }} - Product Details - Soccer Store</title>
+{% endblock meta %}
+
 {% block content %}
-<p><a href="{% url 'main:show_main' %}"><button>← Back to Products List</button></a></p>
+<div class="bg-white w-full min-h-screen pt-16">
+    <div class="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        
+        <!-- Back Navigation -->
+        <div class="mb-6">
+            <a href="{% url 'main:show_main' %}" 
+               class="inline-block px-5 py-2 bg-yellow-400 text-black rounded-md font-semibold shadow-md border border-yellow-500 hover:bg-yellow-500 hover:shadow-lg transition-all">
+                ← Back to Product list
+            </a>
+        </div>
+        
+        <!-- Product Card -->
+        <article class="bg-white rounded-lg border-8 border-[#4B0082] overflow-hidden shadow-sm">
+            
+            <!-- Header -->
+            <div class="p-6 sm:p-8">
+                <div class="flex flex-wrap items-center gap-2 mb-4">
+                    <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-purple-700 text-white">
+                        {{ news.get_category_display }}
+                    </span>
+                    {% if news.is_featured %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-yellow-400 text-black">
+                            Featured
+                        </span>
+                    {% endif %}
+                    {% if news.is_news_hot %}
+                        <span class="inline-flex items-center px-3 py-1 rounded-md text-xs font-medium bg-red-500 text-white">
+                            Hot
+                        </span>
+                    {% endif %}
+                </div>
+                
+                <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 leading-tight mb-2">
+                    {{ news.name }}
+                </h1>
+                <p class="text-2xl font-semibold text-purple-700 mb-4">
+                    Rp {{ news.price|intcomma }}
+                </p>
+                
+                <div class="flex flex-wrap items-center text-sm text-gray-600 gap-4">
+                    <time datetime="{{ news.created_at|date:'c' }}" class="font-semibold">
+                        {{ news.created_at|date:"M j, Y g:i A" }}
+                    </time>
+                    <span class="font-semibold">{{ news.news_views|intcomma }} views</span>
+                </div>
+            </div>
 
-<h1>{{ news.name }}</h1>
-<p><b>{{ news.get_category_display }}</b>
-{% if news.is_featured %} | <b>Featured</b>{% endif %}
- | <i>{{ news.created_at|date:"d M Y, H:i" }}</i></p>
+            <!-- Featured Image -->
+            {% if news.thumbnail %}
+                <div class="px-6 sm:px-8">
+                    <img src="{{ news.thumbnail }}" 
+                         alt="{{ news.name }}" 
+                         class="w-full max-h-96 object-contain rounded-lg bg-gray-100">
 
-{% if news.thumbnail %}
-<img src="{{ news.thumbnail }}" alt="News thumbnail" width="300">
-<br /><br />
-{% endif %}
+                </div>
+            {% endif %}
 
-<p><b>Price:</b> Rp {{ news.price }}</p>
+            <!-- Description -->
+            <div class="p-6 sm:p-8">
+                <div class="prose prose-lg max-w-none">
+                    <div class="text-gray-700 leading-relaxed whitespace-pre-line text-base sm:text-lg">
+                        {{ news.description }}
+                    </div>
+                </div>
+            </div>
 
-<p>{{ news.description }}</p>
-
-{% if news.user %}
-    <p>Author: {{ news.user.username }}</p>
-{% else %}
-    <p>Author: Anonymous</p>
-{% endif %}
-
+            <!-- Author Info -->
+            <div class="border-t border-gray-200 p-6 sm:p-8 bg-gray-50">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <div class="font-medium text-gray-900">
+                            {% if news.user %}
+                                <p>Seller: {{ news.user.username }}</p>
+                            {% else %}
+                                <p>Seller: Anonymous</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </article>
+    </div>
+</div>
 {% endblock content %}

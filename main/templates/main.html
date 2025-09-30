@@ -1,65 +1,64 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block meta %}
+<title>Soccer Store</title>
+{% endblock meta %}
+
 {% block content %}
-<h1>{{ app_name }}</h1>
+{% include 'navbar.html' %}
+<div class="bg-white w-full pt-16 min-h-screen">
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
-<h5>NPM: </h5>
-<p>{{ npm }}</p>
+    <!-- Header Section -->
+    <div class="mb-8">
+      <h1 class="text-3xl font-bold text-gray-900 mb-2">Here are our Products</h1>
+      <p class="text-gray-600">Stay updated with the latest Products at our Soccer Store</p>
+    </div>
 
-<h5>Name:</h5>
-<p>{{ name }}</p>
+    <!-- Filter Section -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-white rounded-lg border border-gray-200 p-4 shadow">
+  
+      <!-- Filter + Add Products -->
+      <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 mb-4 sm:mb-0">
+        <a href="{% url 'main:show_main' %}?filter=all" 
+           class="{% if request.GET.filter|default:'all' == 'all' %} bg-purple-700 text-white {% else %} bg-white text-gray-700 border border-gray-300 {% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-yellow-400 hover:text-purple-900">
+          All Products
+        </a>
+        <a href="{% url 'main:show_main' %}?filter=my" 
+           class="{% if request.GET.filter == 'my' %} bg-purple-700 text-white {% else %} bg-white text-gray-700 border border-gray-300 {% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-yellow-400 hover:text-purple-900">
+          My Products
+        </a>
+        {% if user.is_authenticated %}
+        <a href="{% url 'main:create_news' %}" 
+           class="px-4 py-2 bg-[#6A0DAD] rounded-lg text-white hover:bg-[#FFD700] hover:text-[#4B0082] font-medium transition">
+          + Add Products
+        </a>
+        {% endif %}
+      </div>
+      {% if user.is_authenticated %}
+        <div class="text-sm text-gray-500">
+          Last login: {{ last_login }}
+        </div>
+      {% endif %}
+    </div>
 
-<h5>Class:</h5>
-<p>{{ class }}</p>
-
-
-<a href="{% url 'main:create_news' %}">
-  <button>+ Add Products</button>
-</a>
-<a href="{% url 'main:logout' %}">
-  <button>Logout</button>
-</a>
-<h5>Last login session: {{ last_login }}</h5>
-<hr>
-
-<a href="?filter=all">
-    <button type="button">All Products</button>
-</a>
-<a href="?filter=my">
-    <button type="button">My Products</button>
-</a> 
-
-<hr>
-
-{% if not news_list %}
-<p>No products data available in Soccer Store.</p>
-{% else %}
-
-{% for news in news_list %}
-<div>
-  <h2><a href="{% url 'main:show_news' news.id %}">{{ news.name }}</a></h2>
-
-  <p>
-    <b>{{ news.get_category_display }}</b>
-    {% if news.is_featured %} | <b>Featured</b>{% endif %}
-    {% if news.is_news_hot %} | <b>Hot</b>{% endif %}
-    | <i>{{ news.created_at|date:"d M Y, H:i" }}</i>
-  </p>  
-
-  {% if news.thumbnail %}
-  <img src="{{ news.thumbnail }}" alt="thumbnail" width="150" height="100">
-  <br />
-  {% endif %}
-
-  <p><b>Price:</b> Rp {{ news.price }}</p>   <!-- ✅ harga ditampilkan -->
-
-  <p>{{ news.description|truncatewords:25 }}...</p>
-
-  <p><a href="{% url 'main:show_news' news.id %}"><button>Read More</button></a></p>
+    <!-- News Grid -->
+    {% if not news_list %}
+      <div class="bg-purple-700 rounded-lg p-12 text-center shadow text-white">
+        <div class="w-32 h-32 mx-auto mb-4">
+          <img src="{% static 'image/no-news.png' %}" alt="No Products available" class="w-full h-full object-contain">
+        </div>
+        <h3 class="text-lg font-medium mb-2">No products found!</h3>
+        <p class="text-purple-200 mb-6">Sell your products by clicking the add products button.</p>
+      </div>
+    {% else %}
+      <div class="space-y-6">
+        {% for news in news_list %}
+          {% include "card_news.html" %}
+        {% endfor %}
+      </div>
+    {% endif %}
+  </div>
 </div>
-
-<hr>
-{% endfor %}
-
-{% endif %}
-
-{% endblock %}
+{% endblock content %}
