@@ -21,10 +21,10 @@ Assignment 3
 5. I created a new Django project and application. Then, i defined the models in models.py according to the required fields. After defined the models, i migrated the database and checked if the models were applied correctly. I created views and connected them to templates for displaying the thing that i want to display. I implemented forms for adding new items and tested their validation using is_valid(). And then i protected all forms with csrf_token to avoid CSRF attacks. I implemented serialization in both JSON and XML to allow data delivery. Finally, I deployed the application and tested it using Postman and a browser.
 6. I still don't have any complaints to the TA's because they work properly and help me a lot when i'm doing the tutorial, and if there's an error they will definitely help me fix it while explain why there's an error and how to fix the error.
 
-![Show JSON](image/JSON.png)
-![Show XML](image/XML.png)
-![Show JSON by ID](image/JSONID.png)
-![Show XML by ID](image/XMLID.png)
+![Show JSON](images/JSON.png)
+![Show XML](images/XML.png)
+![Show JSON by ID](images/JSONID.png)
+![Show XML by ID](images/XMLID.png)
 
 
 
