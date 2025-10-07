@@ -7,6 +7,7 @@
 
 {% block content %}
 {% include 'navbar.html' %}
+
 <div class="bg-white w-full pt-16 min-h-screen">
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
 
@@ -18,22 +19,11 @@
 
     <!-- Filter Section -->
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-8 bg-white rounded-lg border border-gray-200 p-4 shadow">
-  
-      <!-- Filter + Add Products -->
       <div class="flex flex-wrap sm:flex-nowrap items-center gap-3 mb-4 sm:mb-0">
-        <a href="{% url 'main:show_main' %}?filter=all" 
-           class="{% if request.GET.filter|default:'all' == 'all' %} bg-purple-700 text-white {% else %} bg-white text-gray-700 border border-gray-300 {% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-yellow-400 hover:text-purple-900">
-          All Products
-        </a>
-        <a href="{% url 'main:show_main' %}?filter=my" 
-           class="{% if request.GET.filter == 'my' %} bg-purple-700 text-white {% else %} bg-white text-gray-700 border border-gray-300 {% endif %} px-4 py-2 rounded-md font-medium transition-colors hover:bg-yellow-400 hover:text-purple-900">
-          My Products
-        </a>
+        <button id="all-products-btn" class="bg-purple-700 text-white px-4 py-2 rounded-md font-medium">All Products</button>
         {% if user.is_authenticated %}
-        <a href="{% url 'main:create_news' %}" 
-           class="px-4 py-2 bg-[#6A0DAD] rounded-lg text-white hover:bg-[#FFD700] hover:text-[#4B0082] font-medium transition">
-          + Add Products
-        </a>
+        <button id="my-products-btn" class="bg-gray-200 text-gray-800 px-4 py-2 rounded-md font-medium">My Products</button>
+        <button id="add-product-btn" class="px-4 py-2 bg-[#6A0DAD] rounded-lg text-white font-medium transition hover:bg-yellow-400 hover:text-purple-900">+ Add Product</button>
         {% endif %}
       </div>
       {% if user.is_authenticated %}
@@ -43,22 +33,22 @@
       {% endif %}
     </div>
 
-    <!-- News Grid -->
-    {% if not news_list %}
-      <div class="bg-purple-700 rounded-lg p-12 text-center shadow text-white">
-        <div class="w-32 h-32 mx-auto mb-4">
-          <img src="{% static 'image/no-news.png' %}" alt="No Products available" class="w-full h-full object-contain">
-        </div>
-        <h3 class="text-lg font-medium mb-2">No products found!</h3>
-        <p class="text-purple-200 mb-6">Sell your products by clicking the add products button.</p>
-      </div>
-    {% else %}
-      <div class="space-y-6">
-        {% for news in news_list %}
-          {% include "card_news.html" %}
-        {% endfor %}
-      </div>
-    {% endif %}
+    <div id="product-container"
+         class="space-y-6"
+         data-get-url="{% url 'main:get_news_json' %}"
+         data-create-url="{% url 'main:create_news_ajax' %}"
+         data-user-id="{{ request.user.id|default:0 }}"
+         data-no-products-image-url="{% static 'image/no-news.png' %}">
+      <p class="text-center text-gray-500">Loading products...</p>
+    </div>
   </div>
 </div>
+
+{% include 'modal.html' %}
+{% include 'delete_modal.html' %} 
+{% include 'toast.html' %}
+
+<script src="{% static 'js/toast.js' %}"></script>
+<script src="{% static 'js/main.js' %}"></script>
+
 {% endblock content %}

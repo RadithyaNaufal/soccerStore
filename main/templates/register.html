@@ -1,4 +1,5 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block meta %}
 <title>Register - Soccer Store</title>
@@ -113,4 +114,45 @@
     </div>
   </div>
 </div>
+
+{% include 'toast.html' %} {# Tambahkan ini #}
+
+{% block scripts %}
+<script src="{% static 'js/toast.js' %}"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const form = document.querySelector("form");
+    
+    form.addEventListener("submit", async function(event) {
+        event.preventDefault();
+
+        const formData = new FormData(form);
+        const url = "{% url 'main:register_ajax' %}";
+
+        try {
+            const response = await fetch(url, {
+                method: "POST",
+                body: formData,
+            });
+            
+            const data = await response.json();
+
+            if (data.status === "success") {
+                showToast('Success', data.message, 'success');
+                setTimeout(() => {
+                    window.location.href = "{% url 'main:login' %}";
+                }, 1000);
+            } else {
+                const firstErrorField = Object.keys(data.errors)[0];
+                const errorMessage = data.errors[firstErrorField][0].message;
+                showToast('Registration Failed', errorMessage, 'error');
+            }
+        } catch (error) {
+            showToast('Error', 'An error occurred. Please try again.', 'error');
+        }
+    });
+});
+</script>
+{% endblock scripts %}
+
 {% endblock content %}

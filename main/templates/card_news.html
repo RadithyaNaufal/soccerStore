@@ -32,9 +32,13 @@
 
       <!-- Nama (judul produk/berita) -->
       <h3 class="text-xl font-semibold text-gray-900 mb-2 leading-tight">
-        <a href="{% url 'main:show_news' news.id %}" class="hover:text-purple-700 transition-colors">
+        {% if news.id %}
+          <a href="{% url 'main:show_news' news.id %}" class="hover:text-purple-700 transition-colors">
+            {{ news.name }}
+          </a>
+        {% else %}
           {{ news.name }}
-        </a>
+        {% endif %}
       </h3>
 
       <!-- Nama Author -->
@@ -64,11 +68,13 @@
 
     <!-- Tombol aksi -->
     <div class="flex items-center justify-between mt-4">
+      {% if news.id %}
       <a href="{% url 'main:show_news' news.id %}" class="text-purple-700 hover:text-yellow-500 font-medium text-sm transition-colors">
         Read more →
       </a>
+      {% endif %}
 
-      {% if user.is_authenticated and news.user == user %}
+      {% if user.is_authenticated and news.user == user and news.id %}
       <div class="flex space-x-2">
         <a href="{% url 'main:edit_news' news.id %}" class="text-gray-600 hover:text-purple-700 text-sm transition-colors">
           Edit
