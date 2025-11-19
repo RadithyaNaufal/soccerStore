@@ -4,6 +4,7 @@ from main.models import News
 from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.core import serializers
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -114,15 +115,41 @@ def show_json_by_id(request, news_id):
         return JsonResponse({'detail': 'Not found'}, status=404)
 
 def register(request):
-    form = UserCreationForm()
-    if request.method == "POST":
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            messages.success(request, 'Your account has been successfully created!')
-            return redirect('main:login')
-    context = {'form': form}
-    return render(request, 'register.html', context)
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        username = data['username']
+        password1 = data['password1']
+        password2 = data['password2']
+
+        # Check if the passwords match
+        if password1 != password2:
+            return JsonResponse({
+                "status": False,
+                "message": "Passwords do not match."
+            }, status=400)
+        
+        # Check if the username is already taken
+        if User.objects.filter(username=username).exists():
+            return JsonResponse({
+                "status": False,
+                "message": "Username already exists."
+            }, status=400)
+        
+        # Create the new user
+        user = User.objects.create_user(username=username, password=password1)
+        user.save()
+        
+        return JsonResponse({
+            "username": user.username,
+            "status": 'success',
+            "message": "User created successfully!"
+        }, status=200)
+    
+    else:
+        return JsonResponse({
+            "status": False,
+            "message": "Invalid request method."
+        }, status=400)
 
 def login_user(request):
     if request.method == 'POST':
@@ -195,23 +222,44 @@ def get_news_json(request):
 @login_required(login_url='/login')
 def create_news_ajax(request):
     if request.method == 'POST':
-        name = request.POST.get("name")
-        price = request.POST.get("price")
-        description = request.POST.get("description")
-        thumbnail = request.POST.get("thumbnail")
-        category = request.POST.get("category")
-        is_featured = request.POST.get("is_featured") == "true"
-        new_news = News.objects.create(
-            user=request.user,
-            name=name,
-            price=int(price),
-            description=description,
-            thumbnail=thumbnail,
-            category=category,
-            is_featured=is_featured,
-        )
-        return JsonResponse({"status": "success", "id": str(new_news.id)})
-    return JsonResponse({"status": "error"}, status=400)
+        try:
+            data = request.POST
+            if not data:
+                try:
+                    data = json.loads(request.body)
+                except json.JSONDecodeError:
+                    return JsonResponse({"status": "error", "message": "Invalid JSON data"}, status=400)
+
+            name = data.get("name")
+            price = data.get("price")
+            description = data.get("description")
+            thumbnail = data.get("thumbnail", "")
+            category = data.get("category", "General")
+            
+            is_featured_raw = data.get("is_featured", False)
+            is_featured = str(is_featured_raw).lower() == 'true' or is_featured_raw is True
+
+            if not name or not price:
+                 return JsonResponse({"status": "error", "message": "Name and Price are required!"}, status=400)
+
+            new_news = News.objects.create(
+                user=request.user,
+                name=name,
+                price=int(price),
+                description=description,
+                thumbnail=thumbnail,
+                category=category,
+                is_featured=is_featured,
+            )
+            new_news.save()
+
+            return JsonResponse({"status": "success", "message": "Product created!"}, status=201)
+            
+        except Exception as e:
+            print(f"ERROR CREATING PRODUCT: {e}")
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
 @csrf_exempt
 @login_required(login_url='/login')
@@ -240,30 +288,77 @@ def edit_news_ajax(request, id):
 @csrf_exempt
 def register_ajax(request):
     if request.method == 'POST':
-        form = UserCreationForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return JsonResponse({"status": "success", "message": "Account created successfully!"}, status=201)
-        else:
-            return JsonResponse({"status": "error", "errors": form.errors}, status=400)
-    return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
+        try:
+            data = request.POST
+            if not data:
+                data = json.loads(request.body)
+            
+            username = data.get('username')
+            password = data.get('password1')
+            confirm_password = data.get('password2')
+
+            if not username or not password or not confirm_password:
+                return JsonResponse({"status": "error", "message": "All fields are required"}, status=400)
+
+            if password != confirm_password:
+                return JsonResponse({"status": "error", "message": "Passwords do not match"}, status=400)
+
+            if User.objects.filter(username=username).exists():
+                return JsonResponse({"status": "error", "message": "Username already taken"}, status=400)
+
+            user = User.objects.create_user(username=username, password=password)
+            user.save()
+
+            return JsonResponse({"status": "success", "message": "Account created successfully!"}, status=200)
+
+        except json.JSONDecodeError:
+            return JsonResponse({"status": "error", "message": "Invalid JSON format"}, status=400)
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
+    return JsonResponse({"status": "error", "message": "Invalid method"}, status=405)
 
 @csrf_exempt
 def login_ajax(request):
     if request.method == 'POST':
-        data = json.loads(request.body)
-        username = data.get('username')
-        password = data.get('password')
-        user = authenticate(request, username=username, password=password)
-        if user is not None:
-            login(request, user)
-            response = JsonResponse({"status": "success", "message": "Login successful!"})
-            response.set_cookie('last_login', str(datetime.datetime.now()))
-            return response
-        else:
-            return JsonResponse({"status": "error", "message": "Invalid username or password."}, status=401)
+        try:
+            data = request.POST
+            if not data:
+                data = json.loads(request.body)
+            
+            username = data.get('username')
+            password = data.get('password')
+            
+            user = authenticate(request, username=username, password=password)
+            
+            if user is not None:
+                login(request, user)
+                response = JsonResponse({
+                    "status": "success", 
+                    "message": "Login successful!", 
+                    "username": user.username
+                }, status=200)
+                response.set_cookie('last_login', str(datetime.datetime.now()))
+                return response
+            else:
+                return JsonResponse({
+                    "status": "error", 
+                    "message": "Invalid username or password."
+                }, status=401)
+
+        except Exception as e:
+            return JsonResponse({"status": "error", "message": str(e)}, status=500)
+
     return JsonResponse({"status": "error", "message": "Invalid request method"}, status=405)
 
+@csrf_exempt
 def logout_ajax(request):
+    username = request.user.username
+
     logout(request)
-    return JsonResponse({"status": "success", "message": "You have been logged out."})
+
+    return JsonResponse({
+        "status": "success", 
+        "message": "You have been logged out.",
+        "username": username
+    })

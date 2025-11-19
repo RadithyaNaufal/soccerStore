@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-*%%2rf1g^zq4*)ki988k4krrtltd44a6pumd8d2jk%z^-i$$!^
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ["localhost", "127.0.0.1", "radithya-naufal-soccerstore.pbp.cs.ui.ac.id"]
+ALLOWED_HOSTS = ["localhost", "127.0.0.1", "radithya-naufal-soccerstore.pbp.cs.ui.ac.id", "10.0.2.2"]
 
 CSRF_TRUSTED_ORIGINS = [
     "https://radithya-naufal-soccerstore.pbp.cs.ui.ac.id"
@@ -42,12 +42,14 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'main',
     'django.contrib.humanize',
+    'corsheaders',
 ]
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
@@ -132,3 +134,10 @@ else:
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+CORS_ALLOW_ALL_ORIGINS = True
+CORS_ALLOW_CREDENTIALS = True
+CSRF_COOKIE_SECURE = True
+SESSION_COOKIE_SECURE = True
+CSRF_COOKIE_SAMESITE = 'None'
+SESSION_COOKIE_SAMESITE = 'None'
